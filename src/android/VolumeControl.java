@@ -42,12 +42,12 @@ public class VolumeControl extends CordovaPlugin {
         play_sound = true;
       }
 
-      setStreamVolume(volume, play_sound);
+      setVolume(volume, play_sound);
       callbackContext.success();
     } else if (GET.equals(action)) {
-      callbackContext.success(getStreamVolume());
+      callbackContext.success(getVolume());
     } else if (GET_MAX.equals(action)) {
-      callbackContext.success(getStreamMaxVolume());
+      callbackContext.success(getMaxVolume());
     } else {
       actionState = false;
     }
@@ -55,7 +55,7 @@ public class VolumeControl extends CordovaPlugin {
     return actionState;
   }
 
-  private void setStreamVolume(int volume, boolean play_sound) {
+  private void setVolume(int volume, boolean play_sound) {
     manager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, (play_sound ? AudioManager.FLAG_PLAY_SOUND : 0));
   }
 
@@ -63,7 +63,7 @@ public class VolumeControl extends CordovaPlugin {
     return manager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
   }
 
-  private int getCurrentVolume() {
+  private int getVolume() {
     return manager.getStreamVolume(AudioManager.STREAM_MUSIC);
   }
 }
