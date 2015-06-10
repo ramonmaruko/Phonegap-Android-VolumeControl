@@ -19,68 +19,55 @@ import android.media.*;
 
 public class VolumeControl extends CordovaPlugin {
 
-	public static final String SET = "setVolume";
-	public static final String GET = "getVolume";
-	private static final String TAG = "VolumeControl";
+  public static final String SET = "setVolume";
+  public static final String GET = "getVolume";
+  public static final String GET_MAX = "getMaxVolume";
+  private static final String TAG = "VolumeControl";
 
-	private Context context;
-	private AudioManager manager;
+  private Context context;
+  private AudioManager manager;
 
-	@Override
-	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-		boolean actionState = true;
-		context = cordova.getActivity().getApplicationContext();
-		manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
-		if (SET.equals(action)) {
-			try {
-				//Get the volume value to set
-				int volume = getVolumeToSet(args.getInt(0));
-				boolean play_sound;
+  @Override
+  public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+    boolean actionState = true;
+    context = cordova.getActivity().getApplicationContext();
+    manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 
-				if(args.length() > 1 && !args.isNull(1)) {
-					play_sound = args.getBoolean(1);
-				} else {
-					play_sound = true;
-				}
+    switch (action) {
+      case SET:
+        int volume = args.getInt(0);
+        boolean play_sound;
+        try {
+          play_sound = args.getBoolean(1);
+        } catch(JSONException e) {
+          play_sound = true;
+        }
 
-				//Set the volume
-				manager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, (play_sound ? AudioManager.FLAG_PLAY_SOUND : 0));
-				callbackContext.success();
-			} catch (Exception e) {
-				LOG.d(TAG, "Error setting volume " + e);
-				actionState = false;
-			}
-		} else if(GET.equals(action)) {
-				//Get current system volume
-				int currVol = getCurrentVolume();
-				String strVol= String.valueOf(currVol);
-				callbackContext.success(strVol);
-				LOG.d(TAG, "Current Volume is " + currVol);
-		} else {
-			actionState = false;
-		}
-		return actionState;
-	}
+        setStreamVolume(volume, play_sound);
+        callbackContext.success();
+        break;
+      case GET:
+        callbackContext.success(getStreamVolume());
+        break;
+      case GET_MAX:
+        callbackContext.success(getStreamMaxVolume());
+        break;
+      default:
+        actionState = false;
+    }
 
-	private int getVolumeToSet(int percent) {
-		int volLevel;
-		int maxVolume = manager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-		volLevel = Math.round((percent * maxVolume) / 100);
+    return actionState;
+  }
 
-		return volLevel;
-	}
+  private void setStreamVolume(int volume, boolean play_sound) {
+    manager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, (play_sound ? AudioManager.FLAG_PLAY_SOUND : 0));
+  }
 
-	private int getCurrentVolume() {
-		try {
-			int volLevel;
-			int maxVolume = manager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-			int currSystemVol = manager.getStreamVolume(AudioManager.STREAM_MUSIC);
-			volLevel = Math.round((currSystemVol * 100) / maxVolume);
+  private int getMaxVolume() {
+    return manager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+  }
 
-			return volLevel;
-		} catch (Exception e) {
-			LOG.d(TAG, "getVolume error: " + e);
-			return 1;
-		}
-	}
+  private int getCurrentVolume() {
+    return manager.getStreamVolume(AudioManager.STREAM_MUSIC);
+  }
 }
