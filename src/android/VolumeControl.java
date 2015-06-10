@@ -33,27 +33,23 @@ public class VolumeControl extends CordovaPlugin {
     context = cordova.getActivity().getApplicationContext();
     manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 
-    switch (action) {
-      case SET:
-        int volume = args.getInt(0);
-        boolean play_sound;
-        try {
-          play_sound = args.getBoolean(1);
-        } catch(JSONException e) {
-          play_sound = true;
-        }
+    if (SET.equals(action)) {
+      int volume = args.getInt(0);
+      boolean play_sound;
+      try {
+        play_sound = args.getBoolean(1);
+      } catch(JSONException e) {
+        play_sound = true;
+      }
 
-        setStreamVolume(volume, play_sound);
-        callbackContext.success();
-        break;
-      case GET:
-        callbackContext.success(getStreamVolume());
-        break;
-      case GET_MAX:
-        callbackContext.success(getStreamMaxVolume());
-        break;
-      default:
-        actionState = false;
+      setStreamVolume(volume, play_sound);
+      callbackContext.success();
+    } else if (GET.equals(action)) {
+      callbackContext.success(getStreamVolume());
+    } else if (GET_MAX.equals(action)) {
+      callbackContext.success(getStreamMaxVolume());
+    } else {
+      actionState = false;
     }
 
     return actionState;
